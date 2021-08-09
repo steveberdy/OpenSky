@@ -2,13 +2,13 @@
 using Newtonsoft.Json;
 using OpenSky.Converters;
 
-namespace OpenSky.Entities
+namespace OpenSky
 {
     /// <summary>
     /// Aircraft Track
     /// </summary>
     [JsonConverter(typeof(InterfaceConverter<IOpenSkyTrack, OpenSkyTrack>))]
-    public interface IOpenSkyTrack
+    internal interface IOpenSkyTrack
     {
         /// <summary>
         /// Unique ICAO 24-bit transponder address for the aircraft
@@ -38,7 +38,7 @@ namespace OpenSky.Entities
         /// Waypoints of the trajectory
         /// </summary>
         [JsonProperty("path")]
-        IOpenSkyTrackPath[] Path { get; }
+        OpenSkyTrackPath[] Path { get; }
     }
 
     public class OpenSkyTrack : IOpenSkyTrack
@@ -50,6 +50,6 @@ namespace OpenSky.Entities
         public DateTime EndTime { get; set; }
         public string CalllSign { get; set; }
         [JsonConverter(typeof(TrackPathArrayConverter))]
-        public IOpenSkyTrackPath[] Path { get; set; }
+        public OpenSkyTrackPath[] Path { get; set; }
     }
 }

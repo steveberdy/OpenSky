@@ -1,16 +1,16 @@
 using Newtonsoft.Json;
 using OpenSky.Converters;
 
-namespace OpenSky.Entities
+namespace OpenSky
 {
     /// <summary>
     /// A search result
     /// </summary>
     [JsonConverter(typeof(InterfaceConverter<IOpenSkySearch, OpenSkySearch>))]
-    public interface IOpenSkySearch
+    internal interface IOpenSkySearch
     {
         [JsonProperty("content")]
-        IOpenSkySearchResult[] Content { get; }
+        OpenSkySearchResult[] Content { get; }
 
         [JsonProperty("last")]
         bool Last { get; }
@@ -22,7 +22,7 @@ namespace OpenSky.Entities
     }
 
     [JsonConverter(typeof(InterfaceConverter<IOpenSkySearchResult, OpenSkySearchResult>))]
-    public interface IOpenSkySearchResult
+    internal interface IOpenSkySearchResult
     {
         [JsonProperty("icao24")]
         string Icao24 { get; }
@@ -42,7 +42,7 @@ namespace OpenSky.Entities
 
     public class OpenSkySearch : IOpenSkySearch
     {
-        public IOpenSkySearchResult[] Content { get; set; }
+        public OpenSkySearchResult[] Content { get; set; }
         public bool Last { get; set; }
         public int TotalElements { get; set; }
     }

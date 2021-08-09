@@ -2,12 +2,12 @@
 using Newtonsoft.Json;
 using OpenSky.Converters;
 
-namespace OpenSky.Entities
+namespace OpenSky
 {
     /// <summary>
     /// Track Path
     /// </summary>
-    public interface IOpenSkyTrackPath
+    internal interface IOpenSkyTrackPath
     {
         /// <summary>
         /// Time of the given waypoint

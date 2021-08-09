@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using OpenSky.Entities;
 
 namespace OpenSky
 {
@@ -64,7 +63,7 @@ namespace OpenSky
         /// <param name="time">DateTime for recent aircraft states, default is now</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<IOpenSkyStates> GetState(string icao24, DateTime time = default, CancellationToken token = default)
+        public Task<OpenSkyStates> GetState(string icao24, DateTime time = default, CancellationToken token = default)
         {
             return GetStates(new[] { icao24 }, time, null, token);
         }
@@ -82,7 +81,7 @@ namespace OpenSky
         /// <param name="region">Optional boundary box region for states</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<IOpenSkyStates> GetStates(IEnumerable<string> icao24s = null, DateTime time = default, OpenSkyRegion region = null, CancellationToken token = default)
+        public Task<OpenSkyStates> GetStates(IEnumerable<string> icao24s = null, DateTime time = default, OpenSkyRegion region = null, CancellationToken token = default)
         {
             var dict = new Dictionary<string, object>();
             if (time != default)
@@ -99,6 +98,10 @@ namespace OpenSky
             }
             if (region != null)
             {
+                if (region.MinLongitude > region.MaxLongitude || region.MinLatitude > region.MaxLatitude)
+                {
+                    throw new OpenSkyException("A region must have valid longitude and latitude widths");
+                }
                 dict.Add("lamin", region.MinLatitude);
                 dict.Add("lomin", region.MinLongitude);
                 dict.Add("lamax", region.MaxLatitude);
@@ -106,7 +109,7 @@ namespace OpenSky
             }
             var query = "states/all" + Utils.CreateQuery(dict);
 
-            return GetAsync<IOpenSkyStates>(query, token);
+            return GetAsync<OpenSkyStates>(query, token);
         }
 
         /// <summary>
@@ -121,7 +124,7 @@ namespace OpenSky
         /// <param name="serials">Your tracker serials</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<IOpenSkyStates> GetMyStates(IEnumerable<string> icao24s = null, DateTime time = default, int[] serials = null, CancellationToken token = default)
+        public Task<OpenSkyStates> GetMyStates(IEnumerable<string> icao24s = null, DateTime time = default, int[] serials = null, CancellationToken token = default)
         {
             if (!IsAuthorized)
             {
@@ -143,7 +146,7 @@ namespace OpenSky
             }
             var query = "states/own" + Utils.CreateQuery(dict);
 
-            return GetAsync<IOpenSkyStates>(query, token);
+            return GetAsync<OpenSkyStates>(query, token);
         }
 
         /// <summary>
@@ -155,7 +158,7 @@ namespace OpenSky
         /// </returns>
         /// <param name="end">DateTime for the end of the interval checked. The beginning will be set to 2 hours before this</param>
         /// <param name="token">Cancellation token</param>
-        public Task<IOpenSkyFlight[]> GetFlights(DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetFlights(DateTime end, CancellationToken token = default)
         {
             return GetFlights(end.Subtract(TimeSpan.FromHours(2)), end, token);
         }
@@ -171,19 +174,21 @@ namespace OpenSky
         /// <param name="end">DateTime for the end of the interval checked</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<IOpenSkyFlight[]> GetFlights(DateTime begin, DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetFlights(DateTime begin, DateTime end, CancellationToken token = default)
         {
             if (begin == default || end == default || end.Subtract(begin).TotalMinutes > 120)
             {
                 throw new OpenSkyException("Beginning and end time must be provided, and must be within 2 hours of each other");
             }
 
-            var dict = new Dictionary<string, object>();
-            dict.Add("begin", begin.ToUnixTimestamp());
-            dict.Add("end", end.ToUnixTimestamp());
+            var dict = new Dictionary<string, object>
+            {
+                { "begin", begin.ToUnixTimestamp() },
+                { "end", end.ToUnixTimestamp() }
+            };
             var query = "flights/all" + Utils.CreateQuery(dict);
 
-            return GetAsync<IOpenSkyFlight[]>(query, token);
+            return GetAsync<OpenSkyFlight[]>(query, token);
         }
 
         /// <summary>
@@ -197,7 +202,7 @@ namespace OpenSky
         /// <param name="end">DateTime for the end of the interval checked. The beginning will be set to 30 days before this</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task<IOpenSkyFlight[]> GetFlightsByAircraft(string icao24, DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetFlightsByAircraft(string icao24, DateTime end, CancellationToken token = default)
         {
             return GetFlightsByAircraft(icao24, end.Subtract(TimeSpan.FromDays(30)), end, token);
         }
@@ -215,7 +220,7 @@ namespace OpenSky
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<IOpenSkyFlight[]> GetFlightsByAircraft(string icao24, DateTime begin, DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetFlightsByAircraft(string icao24, DateTime begin, DateTime end, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(icao24))
             {
@@ -226,13 +231,15 @@ namespace OpenSky
                 throw new OpenSkyException("Beginning and end time must be provided, and must be within 30 days of each other");
             }
 
-            var dict = new Dictionary<string, object>();
-            dict.Add("icao24", icao24);
-            dict.Add("begin", begin.ToUnixTimestamp());
-            dict.Add("end", end.ToUnixTimestamp());
+            var dict = new Dictionary<string, object>
+            {
+                { "icao24", icao24 },
+                { "begin", begin.ToUnixTimestamp() },
+                { "end", end.ToUnixTimestamp() }
+            };
             var query = "flights/aircraft" + Utils.CreateQuery(dict);
 
-            return GetAsync<IOpenSkyFlight[]>(query, token);
+            return GetAsync<OpenSkyFlight[]>(query, token);
         }
 
         /// <summary>
@@ -248,7 +255,7 @@ namespace OpenSky
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<IOpenSkyTrack> GetTrackByAircraft(string icao24, DateTime time = default, CancellationToken token = default)
+        public Task<OpenSkyTrack> GetTrackByAircraft(string icao24, DateTime time = default, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(icao24))
             {
@@ -259,12 +266,14 @@ namespace OpenSky
                 throw new OpenSkyException("Cannot access flight tracks over 30 days in the past");
             }
 
-            var dict = new Dictionary<string, object>();
-            dict.Add("icao24", icao24);
-            dict.Add("time", (time == default ? 0 : time.ToUnixTimestamp()));
+            var dict = new Dictionary<string, object>
+            {
+                { "icao24", icao24 },
+                { "time", (time == default ? 0 : time.ToUnixTimestamp()) }
+            };
             var query = "tracks/all" + Utils.CreateQuery(dict);
 
-            return GetAsync<IOpenSkyTrack>(query, token);
+            return GetAsync<OpenSkyTrack>(query, token);
         }
 
         /// <summary>
@@ -276,14 +285,14 @@ namespace OpenSky
         /// <param name="icao24">Aircraft ICAO-24 code</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task<IOpenSkyRegistration> GetAircraftRegistration(string icao24, CancellationToken token = default)
+        public Task<OpenSkyRegistration> GetAircraftRegistration(string icao24, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(icao24))
             {
                 throw new ArgumentNullException(nameof(icao24));
             }
 
-            return GetAsync<IOpenSkyRegistration>($"metadata/aircraft/icao/{icao24}", token);
+            return GetAsync<OpenSkyRegistration>($"metadata/aircraft/icao/{icao24}", token);
         }
 
         /// <summary>
@@ -297,14 +306,14 @@ namespace OpenSky
         /// <param name="amount">The number of results to return</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task<IOpenSkySearch> GetAircraftSearch(string search, int amount = 50, CancellationToken token = default)
+        public Task<OpenSkySearch> GetAircraftSearch(string search, int amount = 50, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(search))
             {
                 throw new ArgumentNullException(nameof(search));
             }
 
-            return GetAsync<IOpenSkySearch>($"metadata/aircraft/list?n={amount}&p=1&q={search}", token);
+            return GetAsync<OpenSkySearch>($"metadata/aircraft/list?n={amount}&p=1&q={search}", token);
         }
 
         /// <summary>
@@ -318,7 +327,7 @@ namespace OpenSky
         /// <param name="end">DateTime for the end of the interval checked. The beginning will be set to seven days before this</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task<IOpenSkyFlight[]> GetAirportArrivals(string icao, DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetAirportArrivals(string icao, DateTime end, CancellationToken token = default)
         {
             return GetAirportArrivals(icao, end.Subtract(TimeSpan.FromDays(7)), end, token);
         }
@@ -336,7 +345,7 @@ namespace OpenSky
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<IOpenSkyFlight[]> GetAirportArrivals(string icao, DateTime begin, DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetAirportArrivals(string icao, DateTime begin, DateTime end, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(icao))
             {
@@ -347,13 +356,15 @@ namespace OpenSky
                 throw new OpenSkyException("Beginning and end time must be provided, and must be within 7 days of each other");
             }
 
-            var dict = new Dictionary<string, object>();
-            dict.Add("airport", icao);
-            dict.Add("begin", begin.ToUnixTimestamp());
-            dict.Add("end", end.ToUnixTimestamp());
+            var dict = new Dictionary<string, object>
+            {
+                { "airport", icao },
+                { "begin", begin.ToUnixTimestamp() },
+                { "end", end.ToUnixTimestamp() }
+            };
             var query = "flights/arrival" + Utils.CreateQuery(dict);
 
-            return GetAsync<IOpenSkyFlight[]>(query, token);
+            return GetAsync<OpenSkyFlight[]>(query, token);
         }
 
         /// <summary>
@@ -367,7 +378,7 @@ namespace OpenSky
         /// <param name="end">DateTime for the end of the interval checked. The beginning will be set to seven days before this</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task<IOpenSkyFlight[]> GetAirportDepartures(string icao, DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetAirportDepartures(string icao, DateTime end, CancellationToken token = default)
         {
             return GetAirportDepartures(icao, end.Subtract(TimeSpan.FromDays(7)), end, token);
         }
@@ -385,7 +396,7 @@ namespace OpenSky
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<IOpenSkyFlight[]> GetAirportDepartures(string icao, DateTime begin, DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetAirportDepartures(string icao, DateTime begin, DateTime end, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(icao))
             {
@@ -396,13 +407,15 @@ namespace OpenSky
                 throw new OpenSkyException("Beginning and end time must be provided, and must be within 7 days of each other");
             }
 
-            var dict = new Dictionary<string, object>();
-            dict.Add("airport", icao);
-            dict.Add("begin", begin.ToUnixTimestamp());
-            dict.Add("end", end.ToUnixTimestamp());
+            var dict = new Dictionary<string, object>
+            {
+                { "airport", icao },
+                { "begin", begin.ToUnixTimestamp() },
+                { "end", end.ToUnixTimestamp() }
+            };
             var query = "flights/departure" + Utils.CreateQuery(dict);
 
-            return GetAsync<IOpenSkyFlight[]>(query, token);
+            return GetAsync<OpenSkyFlight[]>(query, token);
         }
 
         /// <summary>
@@ -414,14 +427,14 @@ namespace OpenSky
         /// <param name="icao">ICAO code for the airport</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task<IOpenSkyAirport> GetAirportInfo(string icao, CancellationToken token = default)
+        public Task<OpenSkyAirport> GetAirportInfo(string icao, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(icao))
             {
                 throw new ArgumentNullException(nameof(icao));
             }
 
-            return GetAsync<IOpenSkyAirport>($"airports?icao={icao}", token);
+            return GetAsync<OpenSkyAirport>($"airports?icao={icao}", token);
         }
 
         /// <summary>
@@ -433,21 +446,23 @@ namespace OpenSky
         /// <param name="region">A region with latitude and longitude restrictions</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task<IOpenSkyAirport[]> GetAirportsByRegion(OpenSkyRegion region, CancellationToken token = default)
+        public Task<OpenSkyAirport[]> GetAirportsByRegion(OpenSkyRegion region, CancellationToken token = default)
         {
             if (region == null)
             {
                 throw new ArgumentNullException(nameof(region));
             }
 
-            var dict = new Dictionary<string, object>();
-            dict.Add("lamin", region.MinLatitude);
-            dict.Add("lomin", region.MinLongitude);
-            dict.Add("lamax", region.MaxLatitude);
-            dict.Add("lomax", region.MaxLongitude);
+            var dict = new Dictionary<string, object>
+            {
+                { "lamin", region.MinLatitude },
+                { "lomin", region.MinLongitude },
+                { "lamax", region.MaxLatitude },
+                { "lomax", region.MaxLongitude }
+            };
             var query = "airports/region" + Utils.CreateQuery(dict);
 
-            return GetAsync<IOpenSkyAirport[]>(query, token);
+            return GetAsync<OpenSkyAirport[]>(query, token);
         }
 
         /// <summary>
@@ -466,16 +481,14 @@ namespace OpenSky
 
             if (response.IsSuccessStatusCode)
             {
-                using (var jtr = new JsonTextReader(
-                    new StreamReader(await response.Content.ReadAsStreamAsync().ConfigureAwait(false)))
-                { CloseInput = true })
-                {
-                    return serializer.Deserialize<TResult>(jtr);
-                }
+                using var jtr = new JsonTextReader(
+                    new StreamReader(await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false)))
+                { CloseInput = true };
+                return serializer.Deserialize<TResult>(jtr);
             }
 
             // If it's not a success, return default instead of throwing an error
-            return default(TResult);
+            return default;
         }
 
         /// <summary>
@@ -484,6 +497,7 @@ namespace OpenSky
         public void Dispose()
         {
             client?.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using OpenSky.Entities;
 
 namespace OpenSky.Converters
 {

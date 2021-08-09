@@ -2,12 +2,12 @@
 using Newtonsoft.Json;
 using OpenSky.Converters;
 
-namespace OpenSky.Entities
+namespace OpenSky
 {
     /// <summary>
     /// State vector representing an aircraft's state
     /// </summary>
-    public interface IOpenSkyStateVector
+    internal interface IOpenSkyStateVector
     {
         /// <summary>
         /// Unique ICAO 24-bit transponder address for the aircraft

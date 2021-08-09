@@ -1,4 +1,4 @@
-namespace OpenSky.Entities
+namespace OpenSky
 {
     /// <summary>
     /// Class representing a box region of latitude and longitude coordinates

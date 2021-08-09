@@ -3,13 +3,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using OpenSky.Converters;
 
-namespace OpenSky.Entities
+namespace OpenSky
 {
     /// <summary>
     /// Response for flight information
     /// </summary>
     [JsonConverter(typeof(InterfaceConverter<IOpenSkyFlight, OpenSkyFlight>))]
-    public interface IOpenSkyFlight
+    internal interface IOpenSkyFlight
     {
         /// <summary>
         /// Unique ICAO 24-bit transponder address for the aircraft
@@ -20,8 +20,7 @@ namespace OpenSky.Entities
         /// <summary>
         /// Estimated departure time for the flight
         /// </summary>
-        [JsonConverter(typeof(UnixDateTimeConverter))]
-        [JsonProperty("firstSeen")]
+        [JsonConverter(typeof(UnixDateTimeConverter)), JsonProperty("firstSeen")]
         DateTime FirstSeen { get; }
 
         /// <summary>
@@ -33,8 +32,7 @@ namespace OpenSky.Entities
         /// <summary>
         /// Estimated arrival time for the flight
         /// </summary>
-        [JsonConverter(typeof(UnixDateTimeConverter))]
-        [JsonProperty("lastSeen")]
+        [JsonConverter(typeof(UnixDateTimeConverter)), JsonProperty("lastSeen")]
         DateTime LastSeen { get; }
 
         /// <summary>

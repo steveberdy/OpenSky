@@ -1,13 +1,13 @@
 using Newtonsoft.Json;
 using OpenSky.Converters;
 
-namespace OpenSky.Entities
+namespace OpenSky
 {
     /// <summary>
     /// Data for an airport's registration
     /// </summary>
     [JsonConverter(typeof(InterfaceConverter<IOpenSkyAirport, OpenSkyAirport>))]
-    public interface IOpenSkyAirport
+    internal interface IOpenSkyAirport
     {
         /// <summary>
         /// 4-character ICAO address for the airport
@@ -43,7 +43,7 @@ namespace OpenSky.Entities
         /// Position information for the airport
         /// </summary>
         [JsonProperty("position")]
-        IOpenSkyPosition Position { get; }
+        OpenSkyPosition Position { get; }
 
         /// <summary>
         /// The airport's continent
@@ -89,7 +89,7 @@ namespace OpenSky.Entities
     }
 
     [JsonConverter(typeof(InterfaceConverter<IOpenSkyPosition, OpenSkyPosition>))]
-    public interface IOpenSkyPosition
+    internal interface IOpenSkyPosition
     {
         /// <summary>
         /// Longitude of the airport
@@ -123,7 +123,7 @@ namespace OpenSky.Entities
         public string Name { get; set; }
         public string City { get; set; }
         public string Type { get; set; }
-        public IOpenSkyPosition Position { get; set; }
+        public OpenSkyPosition Position { get; set; }
         public string Continent { get; set; }
         public string Country { get; set; }
         public string Region { get; set; }

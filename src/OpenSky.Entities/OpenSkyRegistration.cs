@@ -3,13 +3,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using OpenSky.Converters;
 
-namespace OpenSky.Entities
+namespace OpenSky
 {
     /// <summary>
     /// Data for an aircraft's registration information
     /// </summary>
     [JsonConverter(typeof(InterfaceConverter<IOpenSkyRegistration, OpenSkyRegistration>))]
-    public interface IOpenSkyRegistration
+    internal interface IOpenSkyRegistration
     {
         [JsonProperty("registration")]
         string Callsign { get; }
@@ -92,12 +92,10 @@ namespace OpenSky.Entities
         [JsonProperty("country")]
         string Country { get; }
 
-        [JsonConverter(typeof(UnixDateTimeConverter))]
-        [JsonProperty("lastSeen")]
+        [JsonConverter(typeof(UnixDateTimeConverter)), JsonProperty("lastSeen")]
         DateTime? LastSeen { get; }
 
-        [JsonConverter(typeof(UnixDateTimeConverter))]
-        [JsonProperty("firstSeen")]
+        [JsonConverter(typeof(UnixDateTimeConverter)), JsonProperty("firstSeen")]
         DateTime? FirstSeen { get; }
 
         [JsonProperty("icao24")]
