@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Linq;
 using Xunit;
 
@@ -7,31 +8,32 @@ namespace OpenSky.Tests
     public class OpenSkyClientTests
     {
         private readonly OpenSkyClient client = new();
-        private OpenSkyStates allStates = null;
+        private OpenSkyStateVector[] allStates = default;
 
-        private async void GetAllStates()
+        private async Task GetAllStates()
         {
             if (allStates == null)
             {
-                allStates = await client.GetStates();
+                allStates = (await client.GetStates()).States;
             }
         }
 
         [Fact]
-        public void Test_GetStates()
+        public async void Test_GetStates()
         {
-            GetAllStates();
+            await GetAllStates();
 
             Assert.NotNull(allStates);
-            Assert.True(allStates.States.Length > 0);
+            Assert.True(allStates.Length > 0);
         }
 
         [Fact]
         public async void Test_GetState()
         {
-            GetAllStates();
+            await GetAllStates();
 
-            var icao24s = allStates.States.Select(x => x.Icao24).ToArray();
+            Assert.NotNull(allStates);
+            var icao24s = allStates.Select(x => x.Icao24).ToArray();
             var res = await client.GetState(icao24s[0]);
             Assert.NotNull(res);
             Assert.True(res.States.Length == 1);
@@ -40,9 +42,9 @@ namespace OpenSky.Tests
         [Fact]
         public async void Test_GetStates_Multiple()
         {
-            GetAllStates();
+            await GetAllStates();
 
-            var icao24s = allStates.States.Select(x => x.Icao24).ToArray();
+            var icao24s = allStates.Select(x => x.Icao24).ToArray();
             var res = await client.GetStates(icao24s.Where(x => x.StartsWith("71c")));
             Assert.NotNull(res);
             Assert.True(res.States.Length > 0);
@@ -64,9 +66,10 @@ namespace OpenSky.Tests
         [Fact]
         public async void Test_GetStates_Fail_TimeRange_UTC()
         {
-            GetAllStates();
+            await GetAllStates();
 
-            var icao24s = allStates.States.Select(x => x.Icao24).Where(x => x.StartsWith("71c"));
+            // The time range is not long enough
+            var icao24s = allStates.Select(x => x.Icao24).Where(x => x.StartsWith("71c"));
             await Assert.ThrowsAsync<OpenSkyException>(async () =>
             {
                 await client.GetStates(icao24s, DateTime.UtcNow.Subtract(new TimeSpan(2, 0, 0)));
@@ -76,9 +79,10 @@ namespace OpenSky.Tests
         [Fact]
         public async void Test_GetStates_Fail_TimeRange_Local()
         {
-            GetAllStates();
+            await GetAllStates();
 
-            var icao24s = allStates.States.Select(x => x.Icao24).Where(x => x.StartsWith("71c"));
+            // An extra test that makes sure local times are subtracted properly
+            var icao24s = allStates.Select(x => x.Icao24).Where(x => x.StartsWith("71c"));
             await Assert.ThrowsAsync<OpenSkyException>(async () =>
             {
                 await client.GetStates(icao24s, DateTime.Now.Subtract(new TimeSpan(2, 0, 0)));
