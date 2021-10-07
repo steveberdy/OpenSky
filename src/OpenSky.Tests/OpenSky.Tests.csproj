@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OpenSky.csproj" />
+    <ProjectReference Include="..\OpenSky\OpenSky.csproj" />
   </ItemGroup>
 
 </Project>
