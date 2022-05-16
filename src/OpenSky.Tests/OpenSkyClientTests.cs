@@ -14,7 +14,7 @@ namespace OpenSky.Tests
         {
             if (allStates == null)
             {
-                allStates = (await client.GetStates()).States;
+                allStates = (await client.GetStatesAsync()).States;
             }
         }
 
@@ -34,7 +34,7 @@ namespace OpenSky.Tests
 
             Assert.NotNull(allStates);
             var icao24s = allStates.Select(x => x.Icao24).ToArray();
-            var res = await client.GetState(icao24s[0]);
+            var res = await client.GetStateAsync(icao24s[0]);
             Assert.NotNull(res);
             Assert.True(res.States.Length == 1);
         }
@@ -45,7 +45,7 @@ namespace OpenSky.Tests
             await GetAllStates();
 
             var icao24s = allStates.Select(x => x.Icao24).ToArray();
-            var res = await client.GetStates(icao24s.Where(x => x.StartsWith("71c")));
+            var res = await client.GetStatesAsync(icao24s.Where(x => x.StartsWith("71c")));
             Assert.NotNull(res);
             Assert.True(res.States.Length > 0);
         }
@@ -53,7 +53,7 @@ namespace OpenSky.Tests
         [Fact]
         public async void Test_GetStates_Region()
         {
-            var res = await client.GetStates(region: new OpenSkyRegion
+            var res = await client.GetStatesAsync(region: new OpenSkyRegion
             {
                 MinLatitude = 45.8389f,
                 MaxLatitude = 47.8229f,
@@ -72,7 +72,7 @@ namespace OpenSky.Tests
             var icao24s = allStates.Select(x => x.Icao24).Where(x => x.StartsWith("71c"));
             await Assert.ThrowsAsync<OpenSkyException>(async () =>
             {
-                await client.GetStates(icao24s, DateTime.UtcNow.Subtract(new TimeSpan(2, 0, 0)));
+                await client.GetStatesAsync(icao24s, DateTime.UtcNow.Subtract(new TimeSpan(2, 0, 0)));
             });
         }
 
@@ -85,7 +85,7 @@ namespace OpenSky.Tests
             var icao24s = allStates.Select(x => x.Icao24).Where(x => x.StartsWith("71c"));
             await Assert.ThrowsAsync<OpenSkyException>(async () =>
             {
-                await client.GetStates(icao24s, DateTime.Now.Subtract(new TimeSpan(2, 0, 0)));
+                await client.GetStatesAsync(icao24s, DateTime.Now.Subtract(new TimeSpan(2, 0, 0)));
             });
         }
 
@@ -95,7 +95,7 @@ namespace OpenSky.Tests
             // Invalid region box size
             await Assert.ThrowsAsync<OpenSkyException>(async () =>
             {
-                await client.GetStates(region: new OpenSkyRegion
+                await client.GetStatesAsync(region: new OpenSkyRegion
                 {
                     MinLatitude = 1,
                     MaxLatitude = -1,

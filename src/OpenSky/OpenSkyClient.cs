@@ -63,9 +63,9 @@ namespace OpenSky
         /// <param name="time">DateTime for recent aircraft states, default is now</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<OpenSkyStates> GetState(string icao24, DateTime time = default, CancellationToken token = default)
+        public Task<OpenSkyStates> GetStateAsync(string icao24, DateTime time = default, CancellationToken token = default)
         {
-            return GetStates(new[] { icao24 }, time, null, token);
+            return GetStatesAsync(new[] { icao24 }, time, null, token);
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace OpenSky
         /// <param name="region">Optional boundary box region for states</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<OpenSkyStates> GetStates(IEnumerable<string> icao24s = null, DateTime time = default, OpenSkyRegion region = null, CancellationToken token = default)
+        public Task<OpenSkyStates> GetStatesAsync(IEnumerable<string> icao24s = null, DateTime time = default, OpenSkyRegion region = null, CancellationToken token = default)
         {
             var dict = new Dictionary<string, object>();
             if (time != default)
@@ -124,7 +124,7 @@ namespace OpenSky
         /// <param name="serials">Your tracker serials</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<OpenSkyStates> GetMyStates(IEnumerable<string> icao24s = null, DateTime time = default, int[] serials = null, CancellationToken token = default)
+        public Task<OpenSkyStates> GetMyStatesAsync(IEnumerable<string> icao24s = null, DateTime time = default, int[] serials = null, CancellationToken token = default)
         {
             if (!IsAuthorized)
             {
@@ -158,9 +158,9 @@ namespace OpenSky
         /// </returns>
         /// <param name="end">DateTime for the end of the interval checked. The beginning will be set to 2 hours before this</param>
         /// <param name="token">Cancellation token</param>
-        public Task<OpenSkyFlight[]> GetFlights(DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetFlightsAsync(DateTime end, CancellationToken token = default)
         {
-            return GetFlights(end.Subtract(TimeSpan.FromHours(2)), end, token);
+            return GetFlightsAsync(end.Subtract(TimeSpan.FromHours(2)), end, token);
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace OpenSky
         /// <param name="end">DateTime for the end of the interval checked</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<OpenSkyFlight[]> GetFlights(DateTime begin, DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetFlightsAsync(DateTime begin, DateTime end, CancellationToken token = default)
         {
             if (begin == default || end == default || end.Subtract(begin).TotalMinutes > 120)
             {
@@ -202,9 +202,9 @@ namespace OpenSky
         /// <param name="end">DateTime for the end of the interval checked. The beginning will be set to 30 days before this</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task<OpenSkyFlight[]> GetFlightsByAircraft(string icao24, DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetFlightsByAircraftAsync(string icao24, DateTime end, CancellationToken token = default)
         {
-            return GetFlightsByAircraft(icao24, end.Subtract(TimeSpan.FromDays(30)), end, token);
+            return GetFlightsByAircraftAsync(icao24, end.Subtract(TimeSpan.FromDays(30)), end, token);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace OpenSky
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<OpenSkyFlight[]> GetFlightsByAircraft(string icao24, DateTime begin, DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetFlightsByAircraftAsync(string icao24, DateTime begin, DateTime end, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(icao24))
             {
@@ -255,7 +255,7 @@ namespace OpenSky
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<OpenSkyTrack> GetTrackByAircraft(string icao24, DateTime time = default, CancellationToken token = default)
+        public Task<OpenSkyTrack> GetTrackByAircraftAsync(string icao24, DateTime time = default, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(icao24))
             {
@@ -269,7 +269,7 @@ namespace OpenSky
             var dict = new Dictionary<string, object>
             {
                 { "icao24", icao24 },
-                { "time", (time == default ? 0 : time.ToUnixTimestamp()) }
+                { "time", time == default ? 0 : time.ToUnixTimestamp() }
             };
             var query = "tracks/all" + Utils.CreateQuery(dict);
 
@@ -285,7 +285,7 @@ namespace OpenSky
         /// <param name="icao24">Aircraft ICAO-24 code</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task<OpenSkyRegistration> GetAircraftRegistration(string icao24, CancellationToken token = default)
+        public Task<OpenSkyRegistration> GetAircraftRegistrationAsync(string icao24, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(icao24))
             {
@@ -306,7 +306,7 @@ namespace OpenSky
         /// <param name="amount">The number of results to return</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task<OpenSkySearch> GetAircraftSearch(string search, int amount = 50, CancellationToken token = default)
+        public Task<OpenSkySearch> GetAircraftSearchAsync(string search, int amount = 50, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(search))
             {
@@ -327,9 +327,9 @@ namespace OpenSky
         /// <param name="end">DateTime for the end of the interval checked. The beginning will be set to seven days before this</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task<OpenSkyFlight[]> GetAirportArrivals(string icao, DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetAirportArrivalsAsync(string icao, DateTime end, CancellationToken token = default)
         {
-            return GetAirportArrivals(icao, end.Subtract(TimeSpan.FromDays(7)), end, token);
+            return GetAirportArrivalsAsync(icao, end.Subtract(TimeSpan.FromDays(7)), end, token);
         }
 
         /// <summary>
@@ -345,7 +345,7 @@ namespace OpenSky
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<OpenSkyFlight[]> GetAirportArrivals(string icao, DateTime begin, DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetAirportArrivalsAsync(string icao, DateTime begin, DateTime end, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(icao))
             {
@@ -378,9 +378,9 @@ namespace OpenSky
         /// <param name="end">DateTime for the end of the interval checked. The beginning will be set to seven days before this</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task<OpenSkyFlight[]> GetAirportDepartures(string icao, DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetAirportDeparturesAsync(string icao, DateTime end, CancellationToken token = default)
         {
-            return GetAirportDepartures(icao, end.Subtract(TimeSpan.FromDays(7)), end, token);
+            return GetAirportDeparturesAsync(icao, end.Subtract(TimeSpan.FromDays(7)), end, token);
         }
 
         /// <summary>
@@ -396,7 +396,7 @@ namespace OpenSky
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="OpenSkyException"></exception>
-        public Task<OpenSkyFlight[]> GetAirportDepartures(string icao, DateTime begin, DateTime end, CancellationToken token = default)
+        public Task<OpenSkyFlight[]> GetAirportDeparturesAsync(string icao, DateTime begin, DateTime end, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(icao))
             {
@@ -427,7 +427,7 @@ namespace OpenSky
         /// <param name="icao">ICAO code for the airport</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task<OpenSkyAirport> GetAirportInfo(string icao, CancellationToken token = default)
+        public Task<OpenSkyAirport> GetAirportInfoAsync(string icao, CancellationToken token = default)
         {
             if (string.IsNullOrWhiteSpace(icao))
             {
@@ -446,7 +446,7 @@ namespace OpenSky
         /// <param name="region">A region with latitude and longitude restrictions</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task<OpenSkyAirport[]> GetAirportsByRegion(OpenSkyRegion region, CancellationToken token = default)
+        public Task<OpenSkyAirport[]> GetAirportsByRegionAsync(OpenSkyRegion region, CancellationToken token = default)
         {
             if (region == null)
             {
