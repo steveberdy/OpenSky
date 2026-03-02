@@ -1,29 +1,27 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace OpenSky.Converters
 {
-    public class TrackPathConverter : JsonConverter
+    public class TrackPathConverter : JsonConverter<OpenSkyTrackPath>
     {
-        public override bool CanConvert(Type objectType) => objectType == typeof(OpenSkyTrackPath);
-
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override OpenSkyTrackPath Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var jsonArray = JArray.Load(reader);
-
             return new OpenSkyTrackPath
             {
-                Time = jsonArray[0].Value<int>().FromUnixTimestamp(),
-                Latitude = jsonArray[1].Value<float?>(),
-                Longitude = jsonArray[2].Value<float?>(),
-                BaroAltitude = jsonArray[3].Value<float?>(),
-                TrueTrack = jsonArray[4].Value<float?>(),
-                OnGround = jsonArray[5].Value<bool>()
+                Time = reader.GetInt32().FromUnixTimestamp(),
+                Latitude =reader.TryGetSingle(out float _lat) ? _lat : null,
+                Longitude =  reader.TryGetSingle(out float _lng) ? _lng : null,
+                BaroAltitude = reader.TryGetSingle(out float _ba) ? _ba : null,
+                TrueTrack = reader.TryGetSingle(out float _tt) ? _tt : null,
+                OnGround = reader.GetBoolean()
             };
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-            => throw new NotImplementedException();
+        public override void Write(Utf8JsonWriter writer, OpenSkyTrackPath value, JsonSerializerOptions options)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

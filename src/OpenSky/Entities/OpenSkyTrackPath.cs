@@ -1,53 +1,35 @@
 ﻿using System;
-using Newtonsoft.Json;
-using OpenSky.Converters;
 
 namespace OpenSky
 {
     /// <summary>
     /// Track Path
     /// </summary>
-    internal interface IOpenSkyTrackPath
+    public class OpenSkyTrackPath
     {
         /// <summary>
         /// Time of the given waypoint
         /// </summary>
-        DateTime Time { get; }
-
+        public DateTime Time { get; set; }
         /// <summary>
         /// WGS-84 latitude in decimal degrees. Can be null
         /// </summary>
-        float? Latitude { get; }
-
+        public float? Latitude { get; set; }
         /// <summary>
         /// WGS-84 longitude in decimal degrees. Can be null
         /// </summary>
-        float? Longitude { get; }
-
+        public float? Longitude { get; set; }
         /// <summary>
         /// Barometric altitude in meters. Can be null
         /// </summary>
-        float? BaroAltitude { get; }
-
+        public float? BaroAltitude { get; set; }
         /// <summary>
         /// True track in decimal degrees clockwise from north. Can be null
         /// </summary>
-        float? TrueTrack { get; }
-
+        public float? TrueTrack { get; set; }
         /// <summary>
         /// Whether or no the received position is a surface position
         /// </summary>
-        bool OnGround { get; }
-    }
-
-    [JsonConverter(typeof(TrackPathConverter))]
-    public class OpenSkyTrackPath : IOpenSkyTrackPath
-    {
-        public DateTime Time { get; set; }
-        public float? Latitude { get; set; }
-        public float? Longitude { get; set; }
-        public float? BaroAltitude { get; set; }
-        public float? TrueTrack { get; set; }
         public bool OnGround { get; set; }
     }
 }

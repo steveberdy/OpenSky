@@ -22,15 +22,5 @@ namespace OpenSky
 
         public static DateTime FromUnixTimestamp(this long unixTimestamp)
             => epoch.AddMilliseconds(unixTimestamp);
-
-        public static DateTime? FromUnixTimestamp(this int? unixTimestamp)
-        {
-            if (unixTimestamp == null)
-            {
-                return null;
-            }
-
-            return unixTimestamp.Value.FromUnixTimestamp();
-        }
     }
 }

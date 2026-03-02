@@ -1,13 +1,12 @@
 using System;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace OpenSky
 {
@@ -18,7 +17,6 @@ namespace OpenSky
     {
         private const string baseUrl = "https://opensky-network.org/api/";
         private readonly HttpClient client;
-        private readonly JsonSerializer serializer;
         private bool IsAuthorized => client.DefaultRequestHeaders.Authorization != null;
 
         /// <summary>
@@ -29,7 +27,6 @@ namespace OpenSky
             client = new HttpClient(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate }, true);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.BaseAddress = new Uri(baseUrl);
-            serializer = new JsonSerializer();
         }
 
         /// <summary>
@@ -477,14 +474,12 @@ namespace OpenSky
         /// <exception cref="OpenSkyException"></exception>
         private async Task<TResult> GetAsync<TResult>(string uriPath, CancellationToken token = default)
         {
-            var response = await client.GetAsync(uriPath, HttpCompletionOption.ResponseContentRead, token).ConfigureAwait(false);
+            using var response = await client.GetAsync(uriPath, HttpCompletionOption.ResponseContentRead, token).ConfigureAwait(false);
 
             if (response.IsSuccessStatusCode)
             {
-                using var jtr = new JsonTextReader(
-                    new StreamReader(await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false)))
-                { CloseInput = true };
-                return serializer.Deserialize<TResult>(jtr);
+                using var stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
+                return JsonSerializer.Deserialize<TResult>(stream);
             }
 
             // If it's not a success, return default instead of throwing an error

@@ -1,30 +1,29 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using System;
+﻿using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace OpenSky.Converters
 {
-    public class FloatUnixTimeConverter : DateTimeConverterBase
+    public class FloatUnixTimeConverter : JsonConverter<DateTime>
     {
-        public override bool CanWrite => false;
-
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             try
             {
-                var parsed = (double)reader.Value;
-                var second = (int)parsed;
-                return second.FromUnixTimestamp();
+                var timestamp = (int)reader.GetDouble();
+                return timestamp.FromUnixTimestamp();
             }
             catch
             {
                 // Timestamps in milliseconds are too large for doubles
-                var second = (long)reader.Value;
-                return second.FromUnixTimestamp();
+                var timestamp = reader.GetInt64();
+                return timestamp.FromUnixTimestamp();
             }
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-            => throw new NotImplementedException();
+        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
