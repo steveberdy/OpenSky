@@ -12,14 +12,11 @@ namespace OpenSky.Tests
 
         private async Task GetAllStates()
         {
-            if (allStates == null)
-            {
-                allStates = (await client.GetStatesAsync()).States;
-            }
+            allStates ??= (await client.GetStatesAsync()).States;
         }
 
         [Fact]
-        public async void Test_GetStates()
+        public async Task Test_GetStates()
         {
             await GetAllStates();
 
@@ -28,7 +25,7 @@ namespace OpenSky.Tests
         }
 
         [Fact]
-        public async void Test_GetState()
+        public async Task Test_GetState()
         {
             await GetAllStates();
 
@@ -40,7 +37,7 @@ namespace OpenSky.Tests
         }
 
         [Fact]
-        public async void Test_GetStates_Multiple()
+        public async Task Test_GetStates_Multiple()
         {
             await GetAllStates();
 
@@ -51,7 +48,7 @@ namespace OpenSky.Tests
         }
 
         [Fact]
-        public async void Test_GetStates_Region()
+        public async Task Test_GetStates_Region()
         {
             var res = await client.GetStatesAsync(region: new OpenSkyRegion
             {
@@ -64,7 +61,7 @@ namespace OpenSky.Tests
         }
 
         [Fact]
-        public async void Test_GetStates_Fail_TimeRange_UTC()
+        public async Task Test_GetStates_Fail_TimeRange_UTC()
         {
             await GetAllStates();
 
@@ -77,7 +74,7 @@ namespace OpenSky.Tests
         }
 
         [Fact]
-        public async void Test_GetStates_Fail_TimeRange_Local()
+        public async Task Test_GetStates_Fail_TimeRange_Local()
         {
             await GetAllStates();
 
@@ -90,7 +87,7 @@ namespace OpenSky.Tests
         }
 
         [Fact]
-        public async void Test_GetStates_Fail_Region()
+        public async Task Test_GetStates_Fail_Region()
         {
             // Invalid region box size
             await Assert.ThrowsAsync<OpenSkyException>(async () =>
