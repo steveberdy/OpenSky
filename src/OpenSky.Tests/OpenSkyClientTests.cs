@@ -8,11 +8,12 @@ namespace OpenSky.Tests
     public class OpenSkyClientTests
     {
         private readonly OpenSkyClient client = new();
-        private OpenSkyStateVector[] allStates = default;
+        private OpenSkyStateVector[] allStates = [];
 
         private async Task GetAllStates()
         {
-            allStates ??= (await client.GetStatesAsync()).States;
+            var res = await client.GetStatesAsync();
+            allStates = res.States;
         }
 
         [Fact]
@@ -20,7 +21,7 @@ namespace OpenSky.Tests
         {
             await GetAllStates();
 
-            Assert.NotNull(allStates);
+            Assert.NotEmpty(allStates);
             Assert.True(allStates.Length > 0);
         }
 
@@ -29,11 +30,11 @@ namespace OpenSky.Tests
         {
             await GetAllStates();
 
-            Assert.NotNull(allStates);
+            Assert.NotEmpty(allStates);
             var icao24s = allStates.Select(x => x.Icao24).ToArray();
             var res = await client.GetStateAsync(icao24s[0]);
             Assert.NotNull(res);
-            Assert.True(res.States.Length == 1);
+            Assert.Single(res.States);
         }
 
         [Fact]
