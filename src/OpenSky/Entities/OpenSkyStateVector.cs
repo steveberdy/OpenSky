@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace OpenSky
 {
     /// <summary>
     /// State vector representing an aircraft's state
     /// </summary>
+    [JsonConverter(typeof(OpenSkyStateVector))]
     public class OpenSkyStateVector
     {
         /// <summary>

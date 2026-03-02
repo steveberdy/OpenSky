@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace OpenSky
 {
     /// <summary>
     /// Track Path
     /// </summary>
+    [JsonConverter(typeof(OpenSkyTrackPath))]
     public class OpenSkyTrackPath
     {
         /// <summary>
